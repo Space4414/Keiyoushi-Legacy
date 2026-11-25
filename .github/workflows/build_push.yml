@@ -19,7 +19,9 @@ on:
         type: boolean
         default: false
 
-permissions: {}
+permissions:
+  contents: read
+  actions: read
 
 concurrency:
   group: ${{ github.workflow }}
@@ -172,13 +174,16 @@ jobs:
   mirror:
     name: Mirror Sync
     needs: build-extensions
-    if: ${{ !cancelled() }}
+    if: ${{ false }}
     uses: $/.github/workflows/codeberg_mirror.yml
     secrets:
       CODEBERG_SSH: ${{ secrets.CODEBERG_SSH }}
 
   publish:
     name: Publish extension repo
+    permissions:
+      contents: write
+      actions: read
     needs: [prepare, build-extensions]
     # Run whenever there's anything to publish, new/changed builds OR only deletions
     if: >-
@@ -187,7 +192,7 @@ jobs:
       needs.prepare.result == 'success' &&
       needs.build-extensions.result != 'failure' &&
       needs.build-extensions.result != 'cancelled' &&
-      needs.prepare.outputs.delete != '[]'
+      true
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
