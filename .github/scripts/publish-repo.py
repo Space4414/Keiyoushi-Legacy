@@ -1,3 +1,4 @@
+import os
 import gzip
 import hashlib
 import html
@@ -32,8 +33,11 @@ current_sha_short = current_sha[:7]
 # from the source tree, which a diff against the empty tree can't see.
 full_rebuild = sys.argv[3] == "true"
 
-with REPO_DIR.joinpath("index.json").open() as f:
-    remote_proto = json_format.Parse(f.read(), index_pb2.Index())
+index_path = REPO_DIR / "index.json"
+remote_proto = (
+    json_format.Parse(index_path.read_text(), index_pb2.Index())
+    if index_path.exists() else index_pb2.Index()
+)
 
 remote_extensions = {
     ext.packageName: ext for ext in remote_proto.extensionList.extensions
@@ -172,7 +176,7 @@ final_extensions.sort(key=lambda ext: ext.packageName)
 index = index_pb2.Index(
     name="Keiyoushi",
     badgeLabel="KEI",
-    signingKey="9add655a78e96c4ec7a53ef89dccb557cb5d767489fac5e785d671a5a75d4da2",
+    signingKey=os.environ["LEGACY_SIGNING_FINGERPRINT"],
     contact=index_pb2.Contact(
         website="https://keiyoushi.github.io",
         discord="https://discord.gg/3FbCpdKbdY",
