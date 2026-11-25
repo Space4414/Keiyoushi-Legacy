@@ -223,7 +223,15 @@ jobs:
           DELETE: ${{ needs.prepare.outputs.delete }}
           FULL_REBUILD: ${{ needs.prepare.outputs.full_rebuild }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
         run: |
+          printf %s "$SIGNING_KEY" | base64 -d > /tmp/legacy.jks
+          LEGACY_SIGNING_FINGERPRINT=$(keytool -list -v -keystore /tmp/legacy.jks -alias "$ALIAS" -storepass "$KEY_STORE_PASSWORD" | sed -n "s/.*SHA256: //p" | head -1 | tr -d ":" | tr "[:upper:]" "[:lower:]")
+          test "${#LEGACY_SIGNING_FINGERPRINT}" -eq 64
+          export LEGACY_SIGNING_FINGERPRINT
+          rm -f /tmp/legacy.jks
           cd repo
           python -m pip install --user --upgrade protobuf
           python -u ../main/.github/scripts/publish-repo.py "$DELETE" "$GITHUB_SHA" "$FULL_REBUILD"
