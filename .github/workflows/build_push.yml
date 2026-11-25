@@ -156,7 +156,7 @@ jobs:
 
       - name: Upload APKs (${{ matrix.chunk.number }})
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: "github.repository == 'keiyoushi/extensions-source'"
+        if: "github.repository == 'Space4414/Keiyoushi-Legacy'"
         with:
           name: "individual-apks-${{ matrix.chunk.number }}"
           path: |
@@ -183,7 +183,7 @@ jobs:
     # Run whenever there's anything to publish, new/changed builds OR only deletions
     if: >-
       always() &&
-      github.repository == 'keiyoushi/extensions-source' &&
+      github.repository == 'Space4414/Keiyoushi-Legacy' &&
       needs.prepare.result == 'success' &&
       needs.build-extensions.result != 'failure' &&
       needs.build-extensions.result != 'cancelled' &&
@@ -207,8 +207,8 @@ jobs:
       - name: Checkout repo branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: keiyoushi/extensions
-          token: ${{ secrets.BOT_PAT }}
+          repository: Space4414/Keiyoushi-Legacy
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: repo
           path: repo
           persist-credentials: true
@@ -217,7 +217,7 @@ jobs:
         env:
           DELETE: ${{ needs.prepare.outputs.delete }}
           FULL_REBUILD: ${{ needs.prepare.outputs.full_rebuild }}
-          GH_TOKEN: ${{ secrets.BOT_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd repo
           python -m pip install --user --upgrade protobuf
@@ -229,8 +229,8 @@ jobs:
             git add .
             git commit -m "Update extensions repo"
             git push
-            curl https://purge.jsdelivr.net/gh/keiyoushi/extensions@repo/index.json
-            curl https://purge.jsdelivr.net/gh/keiyoushi/extensions@repo/index.pb
+            curl https://purge.jsdelivr.net/gh/Space4414/Keiyoushi-Legacy@repo/index.json
+            curl https://purge.jsdelivr.net/gh/Space4414/Keiyoushi-Legacy@repo/index.pb
           else
             echo "No changes to commit"
           fi
